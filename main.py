@@ -15,8 +15,6 @@ import shutil
 
 user = "dsk"
 bucket_name = (st.secrets["bucket_name"])
-# Set your OpenAI API key
-os.environ["OPENAI_API_KEY"] = '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'
 openai.api_key = (st.secrets["openai_api_key"])
 
 key_dict = json.loads(st.secrets["textkey"])
