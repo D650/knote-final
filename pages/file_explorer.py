@@ -20,7 +20,7 @@ else:
     app = firebase_admin._apps
 
 def upload_file_to_storage(file, blob_name):
-    storage_client = storage.Client.from_service_account_json('firebase.json')
+    storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
     bucket = storage_client.bucket(bucket_name)
 
     local_file_path = os.path.join("temp", file.name)
@@ -41,7 +41,7 @@ def sanitize_filename(filename):
 
 def delete_file_from_storage(file_path):
     try:
-        storage_client = storage.Client.from_service_account_json('firebase.json')
+        storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
         bucket = storage_client.bucket("knote-c1512.appspot.com")
         blob = bucket.blob(file_path)
         blob.delete()
@@ -49,7 +49,7 @@ def delete_file_from_storage(file_path):
         st.error(f"Error deleting file: {e}")
 
 def list_files_in_directory(directory_path):
-    storage_client = storage.Client.from_service_account_json('firebase.json')
+    storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
     bucket = storage_client.bucket("knote-c1512.appspot.com")
     blobs = bucket.list_blobs(prefix=directory_path)
     file_paths = ["/".join((blob.name.split("/")[1:])) for blob in blobs]
