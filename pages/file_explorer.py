@@ -23,15 +23,9 @@ def upload_file_to_storage(file, blob_name):
     storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
     bucket = storage_client.bucket(bucket_name)
 
-    local_file_path = os.path.join("temp", file.name)
-    with open(local_file_path, "wb") as local_file:
-        local_file.write(uploaded_file.getbuffer())
-
     blob = bucket.blob(blob_name)
-    blob.upload_from_filename(local_file_path)
+    blob.upload_from_string(file.read())
 
-    os.remove(local_file_path)
-    print("File uploaded successfully!")
 
 def sanitize_filename(filename):
     sanitized_name = filename.rsplit('.', 1)[0]
@@ -113,4 +107,4 @@ if uploaded_files:
 
         upload_file_to_storage(uploaded_file, f"users/{user}/knote_info/{unique_filename}")
 
-    st.success(f"{len(uploaded_files)} files uploaded and saved")
+    st.success(f"{len(uploaded_files)} file(s) uploaded and saved")
