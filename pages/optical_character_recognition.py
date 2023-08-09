@@ -32,7 +32,7 @@ else:
 #     return extracted_text
 
 def string_to_txt_file(contents, file_name):
-    storage_client = storage.Client.from_service_account_json('firebase.json')
+    storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
     bucket = storage_client.bucket(bucket_name)
 
     blob = bucket.blob(f"users/{user}/knote_info/{file_name}.txt")

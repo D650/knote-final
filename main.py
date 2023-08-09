@@ -38,7 +38,7 @@ prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chu
 llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-3.5-turbo", max_tokens=num_outputs))
 
 def tokenize_and_divide(storage_directory, token_limit):
-    storage_client = storage.Client.from_service_account_json('firebase.json')
+    storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
     bucket = storage_client.bucket(bucket_name)
 
     processed_dir = f'users/{user}/processed_knote_info'
@@ -72,7 +72,7 @@ def tokenize_and_divide(storage_directory, token_limit):
 def construct_index():
     wait_text = "Please Wait"
     with st.spinner(wait_text):
-        storage_client = storage.Client.from_service_account_json('firebase.json')
+        storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
         bucket = storage_client.bucket(bucket_name)
         wait_text = "Tokenizing"
         tokenize_and_divide(f"users/{user}/knote_info", 4096)
@@ -125,7 +125,7 @@ def convert_to_dict(vector_store_index):
 def load_index_from_firebase():
 
     local_directory = f"user_dirs/{user}.json"
-    storage_client = storage.Client.from_service_account_json('firebase.json')
+    storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
     bucket = storage_client.bucket(bucket_name)
     user_directory = f'users/{user}/{user}.json'  # Directory containing user's files
     blobs = bucket.list_blobs(prefix=user_directory)  # List all files in the directory
