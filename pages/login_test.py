@@ -4,9 +4,7 @@ import googleapiclient.discovery
 import json
 import secrets
 import os
-import streamlit_google_oauth as oauth
-
-
+oauth = __import__("streamlit-google-oauth")
 
 login_info = oauth.login(
         client_id=json.loads(st.secrets["logintextkey"])["web"]["client_id"],
