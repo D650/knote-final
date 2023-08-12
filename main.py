@@ -11,6 +11,28 @@ from google.cloud import storage
 import firebase_admin
 from firebase_admin import credentials, firestore
 import shutil
+import s3fs
+
+AWS_KEY = st.secrets["aws_key"]
+AWS_SECRET = os.environ['aws_secret']
+AWS_BUCKET_NAME = os.environ['aws_bucket_name']
+
+assert AWS_KEY is not None and AWS_KEY != ""
+
+s3 = s3fs.S3FileSystem(
+    key=AWS_KEY,
+    secret=AWS_SECRET,
+    client_kwargs={'endpoint_url': 'https://s3.us-east-2.amazonaws.com'},  # Update the endpoint URL if needed
+    s3_additional_kwargs={'ACL': 'public-read'}
+)
+
+# # this is {bucket_name}/{index_name}
+# index.storage_context.persist(f'{AWS_BUCKET_NAME}/storage_demo', fs=s3)
+# # load index from s3
+# sc = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/storage_demo', fs=s3)
+
+
+
 
 
 user = "dsk"
@@ -101,21 +123,21 @@ def construct_index():
         llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-3.5-turbo", max_tokens=num_outputs))
         documents = SimpleDirectoryReader(local_temp_dir).load_data()
         index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-        # index_dict = index.storage_context.index_to_dict()
+        # index_dict = index.storage_context.index_to_json()
         # db.reference('index').set(index_dict)
         shutil.rmtree(local_temp_dir)
         # index.storage_context.persist(f'{user}.json')
-
-        local_directory = f"{user}.json"
-        destination_directory = f"users/{user}/{user}.json"
-
-        for root, _, files in os.walk(local_directory):
-            for file in files:
-                local_file_path = os.path.join(root, file)
-                relative_path = os.path.relpath(local_file_path, local_directory)
-                destination_blob_name = os.path.join(destination_directory, relative_path).replace("\\", "/")
-                blob = bucket.blob(destination_blob_name)
-                blob.upload_from_filename(local_file_path)
+        index.storage_context.persist(f'{AWS_BUCKET_NAME}/{user}', fs=s3)
+        # local_directory = f"{user}.json"
+        # destination_directory = f"users/{user}/{user}.json"
+        #
+        # for root, _, files in os.walk(local_directory):
+        #     for file in files:
+        #         local_file_path = os.path.join(root, file)
+        #         relative_path = os.path.relpath(local_file_path, local_directory)
+        #         destination_blob_name = os.path.join(destination_directory, relative_path).replace("\\", "/")
+        #         blob = bucket.blob(destination_blob_name)
+        #         blob.upload_from_filename(local_file_path)
 
         return index
 
@@ -142,8 +164,9 @@ def load_index_from_firebase():
             blob.download_to_filename(local_filename)
 
 def chatbot(input_text, messages, uploaded_files=None):
-    load_index_from_firebase()
-    storage_context = StorageContext.from_defaults(persist_dir=f'user_dirs/{user}.json')
+    # load_index_from_firebase()
+    storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
+    # storage_context = StorageContext.from_defaults(persist_dir=f'user_dirs/{user}.json')
     index = load_index_from_storage(storage_context)
 
     query_engine = index.as_query_engine()
@@ -182,7 +205,7 @@ if prompt := st.chat_input():
     st.chat_message("user").write(prompt)
 
     load_index_from_firebase()
-    storage_context = StorageContext.from_defaults(persist_dir=f'user_dirs/{user}.json')
+    storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
     index = load_index_from_storage(storage_context)
 
     response = chatbot(prompt, st.session_state.messages, index)
