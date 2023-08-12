@@ -30,7 +30,7 @@ if "code" in st.experimental_get_query_params():
         # if state != expected_state:
         #     raise ValueError("Mismatching state parameter")
         # flow.fetch_token(code=auth_code)
-        flow.fetch_token(authorization_response=auth_code)
+        flow.fetch_token(authorization_response=auth_code,code=auth_code)
         st.session_state.credentials = flow.credentials
 
 
