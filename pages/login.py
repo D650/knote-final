@@ -2,9 +2,7 @@ import streamlit as st
 from google_auth_oauthlib.flow import Flow
 import googleapiclient.discovery
 import json
-import os
 
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 flow = Flow.from_client_config(
     json.loads(st.secrets["logintextkey"]),
