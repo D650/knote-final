@@ -5,7 +5,8 @@ import json
 
 flow = Flow.from_client_config(
     json.loads(st.secrets["logintextkey"]),
-    scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
+    scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
+    redirect_uri= st.secrets["ouath_redirect_url"],
 )
 
 # Check if user is already authenticated
