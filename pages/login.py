@@ -20,6 +20,7 @@ if "credentials" not in st.session_state:
 
 if "code" in st.experimental_get_query_params():
     auth_code = st.experimental_get_query_params()["code"][0]
+    st.write(auth_code)
     flow.fetch_token(authorization_response=auth_code)
     st.session_state.credentials = flow.credentials
 
