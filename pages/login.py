@@ -4,6 +4,8 @@ import googleapiclient.discovery
 import json
 import secrets
 
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+
 flow = Flow.from_client_config(
     json.loads(st.secrets["logintextkey"]),
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
@@ -13,7 +15,7 @@ flow = Flow.from_client_config(
 state = secrets.token_urlsafe(16)
 
 if "credentials" not in st.session_state:
-    authorization_url, _ = flow.authorization_url(prompt='consent',state=state,include_granted_scopes='true')
+    authorization_url, _ = flow.authorization_url(prompt='consent',state=state,)
     # authorization_url, _ = flow.authorization_url(prompt='consent')
     st.write(f"Click [here]({authorization_url}) to authenticate with Google.")
 
