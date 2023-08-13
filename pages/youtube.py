@@ -5,9 +5,11 @@ from firebase_admin import credentials, firestore
 from google.cloud import storage
 import time
 import json
+from streamlit_oauth import *
+import requests
 
 bucket_name = (st.secrets["bucket_name"])
-user="dsk"
+
 
 key_dict = json.loads(st.secrets["textkey"])
 cred = credentials.Certificate(key_dict)
@@ -18,7 +20,7 @@ if not firebase_admin._apps:
 else:
     app = firebase_admin._apps
 
-def string_to_txt_file(contents, file_name):
+def string_to_txt_file(contents, file_name, user):
     storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
     bucket = storage_client.bucket(bucket_name)
 
@@ -49,21 +51,34 @@ def get_transcript(youtube_url):
         return None
 
 
-st.title("YouTube Transcript Extractor")
-st.write("Enter a YouTube URL to extract its transcript.")
+if 'token' not in st.session_state:
+        st.write("No token in session state. Please authorize on the login page.")
+else:
 
-youtube_url = st.text_input("YouTube URL:")
-if youtube_url:
-    try:
-        transcript, video_id = get_transcript(youtube_url)
-    except TypeError:
-        st.stop()
-    if transcript:
-        st.write("Transcript:")
-        user_text = st.text_area(
-            "",
-            value=transcript,height=500)
-        if st.button("🤖 Send to File Explorer"):
-            string_to_txt_file(user_text,f"youtube_{video_id}_{int(time.time())}")
+    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+    token = st.session_state['token']
+    headers = {'Authorization': f'Bearer {token["access_token"]}'}
+    response = requests.get(user_info_url, headers=headers)
+    user_info = response.json()
+
+    user = user_info["email"]
+
+    st.title("YouTube Transcript Extractor")
+    st.divider()
+    st.write("Enter a YouTube URL to extract its transcript.")
+
+    youtube_url = st.text_input("YouTube URL:")
+    if youtube_url:
+        try:
+            transcript, video_id = get_transcript(youtube_url)
+        except TypeError:
+            st.stop()
+        if transcript:
+            st.write("Transcript:")
+            user_text = st.text_area(
+                "",
+                value=transcript,height=500)
+            if st.button("🤖 Send to File Explorer"):
+                string_to_txt_file(user_text,f"youtube_{video_id}_{int(time.time())}", user)
 
 

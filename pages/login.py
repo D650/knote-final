@@ -1,54 +1,42 @@
 import streamlit as st
-from google_auth_oauthlib.flow import Flow
-import googleapiclient.discovery
 import json
-import secrets
-import os
+from streamlit_oauth import *
+import requests
 
+AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+TOKEN_URL = "https://oauth2.googleapis.com/token"
+REFRESH_TOKEN_URL = "https://oauth2.googleapis.com/token"
+REVOKE_URL = "https://oauth2.googleapis.com/revoke"
+CLIENT_ID = json.loads(st.secrets["logintextkey"])['web']['client_id']
+CLIENT_SECRET = json.loads(st.secrets["logintextkey"])['web']['client_secret']
+REDIRECT_URI = json.loads(st.secrets["logintextkey"])['web']['redirect_uris'][0]
+SCOPE = "openid profile email"
 
-os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+oauth2 = OAuth2Component(CLIENT_ID, CLIENT_SECRET, AUTHORIZATION_URL, TOKEN_URL, TOKEN_URL, REVOKE_URL)
 
-flow = Flow.from_client_config(
-    json.loads(st.secrets["logintextkey"]),
-    scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
-    redirect_uri= st.secrets["ouath_redirect_url"],
-)
+st.title("Login")
+st.divider()
 
-state = secrets.token_urlsafe(16)
+if 'token' not in st.session_state:
+        st.write("No token in session state. Please authorize below.")
+        result = oauth2.authorize_button("🔗 Login with Google", REDIRECT_URI, SCOPE)
+        if result:
+                st.write("Got token!")
+                st.session_state.token = result.get('token')
+                st.experimental_rerun()
+else:
 
-if "credentials" not in st.session_state:
-    authorization_url, _ = flow.authorization_url(prompt='consent',state=state)
-    # authorization_url, _ = flow.authorization_url(prompt='consent')
-    st.write(f"Click [here]({authorization_url}) to authenticate with Google.")
+        token = st.session_state['token']
+        # st.json(token)
 
+        user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+        headers = {'Authorization': f'Bearer {token["access_token"]}'}
+        response = requests.get(user_info_url, headers=headers)
+        user_info = response.json()
 
-if "code" in st.experimental_get_query_params():
-        auth_code = st.experimental_get_query_params()["code"][0]
-        # Retrieve the state parameter from the query parameters
-        state = st.experimental_get_query_params()["state"][0]
+        st.write(f"Token detected, welcome {user_info['email']}")
 
-        # # Check if the state parameter matches the expected value
-        # if state != expected_state:
-        #     raise ValueError("Mismatching state parameter")
-        # flow.fetch_token(code=auth_code)
-        flow.fetch_token(authorization_response=auth_code)
-        st.session_state.credentials = flow.credentials
-
-
-if "credentials" in st.session_state:
-    credentials = st.session_state.credentials
-    service = googleapiclient.discovery.build('plus', 'v1', credentials=credentials)
-    user_info = service.people().get(userId='me').execute()
-
-    st.write("Authenticated User's Email:", user_info['emails'][0]['value'])
-    st.write("Authenticated User's ID:", user_info['id'])
-
-    if st.button("Show User Info"):
-        st.write("Authenticated User's Email:", user_info['emails'][0]['value'])
-        st.write("Authenticated User's ID:", user_info['id'])
-
-# from googleapiclient.discovery import build
-#
-# service = build('plus', 'v1', credentials=credentials)
-# user_info = service.people().get(userId='me').execute()
-# st.write("Authenticated User's Email:", user_info['emails'][0]['value'])
+        if st.button("♻️ Refresh Token"):
+                token = oauth2.refresh_token(token)
+        st.session_state.token = token
+        # st.experimental_rerun()

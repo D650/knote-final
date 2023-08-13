@@ -11,11 +11,13 @@ from google.cloud import storage
 # import shutil
 import json
 # import easyocr
+from streamlit_oauth import *
+import requests
 
 # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 bucket_name = (st.secrets["bucket_name"])
-user="dsk"
+
 
 
 key_dict = json.loads(st.secrets["textkey"])
@@ -31,7 +33,7 @@ else:
 #     extracted_text = pytesseract.image_to_string(image, lang='eng')
 #     return extracted_text
 
-def string_to_txt_file(contents, file_name):
+def string_to_txt_file(contents, file_name, user):
     storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
     bucket = storage_client.bucket(bucket_name)
 
@@ -46,7 +48,7 @@ def pdf_to_text(file):
         text += page.extract_text() + "\n"
     return text
 
-def process_uploaded_file(uploaded_file):
+def process_uploaded_file(uploaded_file, user):
     file_name = uploaded_file.name
     file_extension = os.path.splitext(file_name)[1]
     if uploaded_file.type == 'application/pdf':
@@ -69,7 +71,7 @@ def process_uploaded_file(uploaded_file):
         "If this doesn't look right, you can edit it. Once you're ready, click 'Send to File Explorer', head back to the homepage and ask away.",
         value=extracted_text, height=500)
     if st.button("🤖 Send to File Explorer"):
-        string_to_txt_file(user_text, file_name=f"u{file_name.split('.')[0]}_{int(time.time())}.txt")
+        string_to_txt_file(user_text, f"u{file_name.split('.')[0]}_{int(time.time())}.txt", user)
 
 # st.title("Image Saver")
 #
@@ -91,10 +93,21 @@ def process_uploaded_file(uploaded_file):
 #         string_to_txt_file(user_text, file_name=f"webcam_{int(time.time())}.txt")
 #     shutil.rmtree("images")
 
-st.divider()
+if 'token' not in st.session_state:
+        st.write("No token in session state. Please authorize on the login page.")
+else:
 
-st.title("Got a pdf? Upload it here:")
+    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
+    token = st.session_state['token']
+    headers = {'Authorization': f'Bearer {token["access_token"]}'}
+    response = requests.get(user_info_url, headers=headers)
+    user_info = response.json()
 
-uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
-if uploaded_file is not None:
-        process_uploaded_file(uploaded_file)
+    user = user_info["email"]
+
+    st.title("Got a pdf? Upload it here:")
+    st.divider()
+
+    uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
+    if uploaded_file is not None:
+            process_uploaded_file(uploaded_file, user)
