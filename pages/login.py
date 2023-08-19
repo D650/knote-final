@@ -4,6 +4,7 @@ import streamlit as st
 import json
 import firebase_admin.auth
 import requests
+import streamlit_extras
 from streamlit_extras.row import row
 
 # # Load Firebase service account key from Streamlit secrets

@@ -11,7 +11,6 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import shutil
 import s3fs
-from streamlit_oauth import *
 import requests
 from streamlit_extras.switch_page_button import switch_page
 
