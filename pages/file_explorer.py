@@ -70,13 +70,16 @@ if 'token' not in st.session_state:
         st.write("No token in session state. Please authorize on the login page.")
 else:
 
-    user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
-    token = st.session_state['token']
-    headers = {'Authorization': f'Bearer {token["access_token"]}'}
-    response = requests.get(user_info_url, headers=headers)
-    user_info = response.json()
+    user_info_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={st.secrets['firebase_api_key']}"
+    payload = {
+        "idToken": st.session_state['token']
+    }
+    response = requests.post(user_info_endpoint, json=payload)
 
-    user = user_info["email"]
+    if response.status_code == 200:
+        user_data = response.json().get("users", [])[0]
+        st.json(user_data)
+        user = user_data['email']
 
 
     st.title("File Explorer")
