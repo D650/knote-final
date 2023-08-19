@@ -124,7 +124,8 @@ else:
             for blob in blobs:
                 try:
                     if blob.name.split("/")[2] == "processed_knote_info" and blob.name.split("/")[1] == user and not blob.name == f"users/{user}/processed_knote_info/" and not blob.name == f"users/{user}/processed_knote_info/":
-                        st.write(blob.name)
+
+
                         local_file_path = os.path.join(local_temp_dir, os.path.basename(blob.name))
                         blob.download_to_filename(local_file_path)
                 except IndexError:
@@ -142,6 +143,7 @@ else:
                 documents = SimpleDirectoryReader(local_temp_dir).load_data()
             except ValueError:
                 st.error("You have not uploaded any files.")
+                st.stop()
             index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             # index_dict = index.storage_context.index_to_json()
             # db.reference('index').set(index_dict)
@@ -178,7 +180,6 @@ else:
             response = query_engine.query(prompt)
 
             return response.response
-
 
     st.title("📜 Knote Chatbot")
     st.divider()
