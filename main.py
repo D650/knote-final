@@ -123,7 +123,7 @@ else:
 
             for blob in blobs:
                 try:
-                    if blob.name.split("/")[2] == "processed_knote_info" and not blob.name == f"users/{user}/processed_knote_info/" and not blob.name == f"temp_index_processed/":
+                    if blob.name.split("/")[2] == "processed_knote_info" and not blob.name == f"users/{user}/processed_knote_info/":
 
                         local_file_path = os.path.join(local_temp_dir, os.path.basename(blob.name))
                         blob.download_to_filename(local_file_path)
@@ -138,7 +138,10 @@ else:
             chunk_size_limit = 600
             prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
             llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-3.5-turbo", max_tokens=num_outputs))
-            documents = SimpleDirectoryReader(local_temp_dir).load_data()
+            try:
+                documents = SimpleDirectoryReader(local_temp_dir).load_data()
+            except ValueError:
+                st.error("You have not uploaded any files.")
             index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             # index_dict = index.storage_context.index_to_json()
             # db.reference('index').set(index_dict)
