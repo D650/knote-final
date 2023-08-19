@@ -47,6 +47,7 @@ firebase_database = db
 
 if 'token' not in st.session_state:
     st.title("Login")
+    st.info("Welcome to Knote, an AI-based study tool. Sign in or create an account below. NOTE: It is highly reccomended to use Knote on a computer, as some functionality has been found to be unpredictable on mobile.")
     st.divider()
 
     email = st.text_input("Email")
