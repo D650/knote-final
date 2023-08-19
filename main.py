@@ -23,7 +23,7 @@ assert AWS_KEY is not None and AWS_KEY != ""
 s3 = s3fs.S3FileSystem(
     key=AWS_KEY,
     secret=AWS_SECRET,
-    client_kwargs={'endpoint_url': 'https://s3.us-east-2.amazonaws.com'},  # Update the endpoint URL if needed
+    client_kwargs={'endpoint_url': 'https://s3.us-east-2.amazonaws.com'},
     s3_additional_kwargs={'ACL': 'public-read'}
 )
 
