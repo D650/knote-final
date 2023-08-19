@@ -142,7 +142,7 @@ else:
             try:
                 documents = SimpleDirectoryReader(local_temp_dir).load_data()
             except ValueError:
-                st.error("You have not uploaded any files.")
+                st.error("You have not uploaded any files. Please upload some and come back to this page.")
                 st.stop()
             index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             # index_dict = index.storage_context.index_to_json()
@@ -192,8 +192,6 @@ else:
 
     st.divider()
 
-    # If there isn't a session variable called messages, create one and add the initial instructions
-    # The "messages" session variable will be used to track the entire chat
     if "messages" not in st.session_state:
         st.session_state["messages"] = [{"role": "assistant", "content": "Welcome to Knote. Please upload your note files above and ask me anything about them, and I'll answer in a clear and concise manner."}]
 
