@@ -11,7 +11,7 @@ from google.cloud import storage
 # import shutil
 import json
 # import easyocr
-from streamlit_oauth import *
+
 import requests
 from streamlit_extras.switch_page_button import switch_page
 

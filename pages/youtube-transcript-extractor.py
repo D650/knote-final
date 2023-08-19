@@ -5,7 +5,7 @@ from firebase_admin import credentials, firestore
 from google.cloud import storage
 import time
 import json
-from streamlit_oauth import *
+
 import requests
 from streamlit_extras.switch_page_button import switch_page
 

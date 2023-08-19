@@ -6,7 +6,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import re
 import json
-from streamlit_oauth import *
+
 import requests
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.row import row
