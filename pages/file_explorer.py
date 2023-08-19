@@ -8,6 +8,8 @@ import re
 import json
 from streamlit_oauth import *
 import requests
+from streamlit_extras.switch_page_button import switch_page
+from streamlit_extras.row import row
 
 bucket_name = (st.secrets["bucket_name"])
 
@@ -68,19 +70,12 @@ def clear_dir(directory_path):
 
 if 'token' not in st.session_state:
         st.write("No token in session state. Please authorize on the login page.")
+
+        if st.button("Go to login page"):
+            switch_page("login")
 else:
-
-    user_info_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={st.secrets['firebase_api_key']}"
-    payload = {
-        "idToken": st.session_state['token']
-    }
-    response = requests.post(user_info_endpoint, json=payload)
-
-    if response.status_code == 200:
-        user_data = response.json().get("users", [])[0]
-
-        user = user_data['email']
-
+    user = st.session_state['user_email']
+    st.sidebar.write(f"Hello, {user}!")
 
     st.title("File Explorer")
 
@@ -96,7 +91,12 @@ else:
 
     del_file = st.text_input("Enter the file path to delete:")
     del_file = f"users/{del_file}"
-    if st.button("Delete"):
+
+    st.divider()
+
+    row = row(3, vertical_align="top", gap="small")
+
+    if row.button("❌ Delete",use_container_width=True):
         pattern = re.compile(f'^users/{re.escape(user)}/')
         if files and pattern.match(del_file):
             delete_file_from_storage(del_file)
@@ -106,10 +106,10 @@ else:
         else:
             st.error("File not found.")
 
-    if st.button("Delete All Files"):
+    if row.button("🗑️ Delete All Files",use_container_width=True):
         clear_dir(f"{user}/knote_info")
 
-    if st.button("Refresh"):
+    if row.button("🔄 Refresh",use_container_width=True):
         time.sleep(1)
         st.experimental_rerun()
 

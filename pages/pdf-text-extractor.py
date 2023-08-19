@@ -13,6 +13,7 @@ import json
 # import easyocr
 from streamlit_oauth import *
 import requests
+from streamlit_extras.switch_page_button import switch_page
 
 # pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -95,19 +96,11 @@ def process_uploaded_file(uploaded_file, user):
 
 if 'token' not in st.session_state:
         st.write("No token in session state. Please authorize on the login page.")
+        if st.button("Go to login page"):
+            switch_page("login")
 else:
-
-    user_info_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={st.secrets['firebase_api_key']}"
-    payload = {
-        "idToken": st.session_state['token']
-    }
-    response = requests.post(user_info_endpoint, json=payload)
-
-    if response.status_code == 200:
-        user_data = response.json().get("users", [])[0]
-
-        user = user_data['email']
-
+    user = st.session_state['user_email']
+    st.sidebar.write(f"Hello, {user}!")
 
     st.title("Got a pdf? Upload it here:")
     st.divider()

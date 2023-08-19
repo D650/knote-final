@@ -13,6 +13,7 @@ import shutil
 import s3fs
 from streamlit_oauth import *
 import requests
+from streamlit_extras.switch_page_button import switch_page
 
 AWS_KEY = st.secrets["aws_key"]
 AWS_SECRET = os.environ['aws_secret']
@@ -54,19 +55,11 @@ llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-3.5-tur
 
 if 'token' not in st.session_state:
         st.write("No token in session state. Please authorize on the login page.")
+        if st.button("Go to login page"):
+            switch_page("login")
 else:
-
-    user_info_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={st.secrets['firebase_api_key']}"
-    payload = {
-        "idToken": st.session_state['token']
-    }
-    response = requests.post(user_info_endpoint, json=payload)
-
-    if response.status_code == 200:
-        user_data = response.json().get("users", [])[0]
-
-        user = user_data['email']
-
+    user = st.session_state['user_email']
+    st.sidebar.write(f"Hello, {user}!")
     def clear_dir(directory_path):
 
         storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
@@ -187,7 +180,7 @@ else:
     st.info("Welcome to the Knowt Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files. Use /generatequestions to generate a list of 10 questions based on your documents.")
 
     st.info("If you've added or removed any files, please press the button below so I can refresh my memory! (If your folder is empty, and you press the button, my memory won't change.")
-    if st.button("Refresh"):
+    if st.button("Refresh", use_container_width=True):
         construct_index()
 
     st.divider()
