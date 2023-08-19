@@ -179,7 +179,7 @@ else:
     st.info("Welcome to the Knowt Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files. Use /generatequestions to generate a list of 10 questions based on your documents.")
 
     st.info("If you've added or removed any files, please press the button below so I can refresh my memory! (If your folder is empty, and you press the button, my memory won't change.")
-    if st.button("Refresh", use_container_width=True):
+    if st.button("🔄 Refresh Chatbot", use_container_width=True):
         construct_index()
 
     st.divider()
