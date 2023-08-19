@@ -30,8 +30,10 @@ def translate_firebase_error(response_json):
         return "You did not provide an email address."
     elif "MISSING_PASSWORD" in error_message:
         return "You did not provide a password."
+    elif "EMAIL_NOT_FOUND" in error_message:
+        return "That account does not exist. Please create an account instead of logging in."
     else:
-        return error_message
+        return "We ran into an error. Please try again."
 
 key_dict = json.loads(st.secrets["textkey"])
 cred = credentials.Certificate(key_dict)
