@@ -105,7 +105,7 @@ else:
 
     if response.status_code == 200:
         user_data = response.json().get("users", [])[0]
-        st.json(user_data)
+
         user = user_data['email']
 
 

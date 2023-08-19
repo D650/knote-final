@@ -1,42 +1,102 @@
+import firebase_admin
+from firebase_admin import credentials, auth, db
 import streamlit as st
 import json
-from streamlit_oauth import *
+import firebase_admin.auth
 import requests
 
-AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth"
-TOKEN_URL = "https://oauth2.googleapis.com/token"
-REFRESH_TOKEN_URL = "https://oauth2.googleapis.com/token"
-REVOKE_URL = "https://oauth2.googleapis.com/revoke"
-CLIENT_ID = json.loads(st.secrets["logintextkey"])['web']['client_id']
-CLIENT_SECRET = json.loads(st.secrets["logintextkey"])['web']['client_secret']
-REDIRECT_URI = json.loads(st.secrets["logintextkey"])['web']['redirect_uris'][0]
-SCOPE = "openid profile email"
+# # Load Firebase service account key from Streamlit secrets
+# firebase_secrets = json.loads(st.secrets["firebase_secrets"])
+#
+# # Initialize Firebase using the service account key
+# cred = credentials.Certificate(firebase_secrets)
+# firebase_admin.initialize_app(cred, {
+#     'databaseURL': 'YOUR_DATABASE_URL'
+# })
 
-oauth2 = OAuth2Component(CLIENT_ID, CLIENT_SECRET, AUTHORIZATION_URL, TOKEN_URL, TOKEN_URL, REVOKE_URL)
+def translate_firebase_error(response_json):
+    error_message = response_json.get("error", {}).get("message", "Unknown error")
+    if "WEAK_PASSWORD" in error_message:
+        return "Your password should be at least 6 characters."
+    elif "EMAIL_EXISTS" in error_message:
+        return "Email address is already in use."
+    elif "INVALID_EMAIL" in error_message:
+        return "That is an invalid email address."
+    elif "MISSING_EMAIL" in error_message:
+        return "You did not provide an email address."
+    else:
+        return error_message
 
-st.title("Login")
-st.divider()
-
-if 'token' not in st.session_state:
-        st.write("No token in session state. Please authorize below.")
-        result = oauth2.authorize_button("🔗 Login with Google", REDIRECT_URI, SCOPE)
-        if result:
-                st.write("Got token!")
-                st.session_state.token = result.get('token')
-                st.experimental_rerun()
+key_dict = json.loads(st.secrets["textkey"])
+cred = credentials.Certificate(key_dict)
+if not firebase_admin._apps:
+    app = firebase_admin.initialize_app(cred)
 else:
+    app = firebase_admin._apps
 
-        token = st.session_state['token']
-        # st.json(token)
 
-        user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
-        headers = {'Authorization': f'Bearer {token["access_token"]}'}
-        response = requests.get(user_info_url, headers=headers)
-        user_info = response.json()
+firebase_auth = auth
+firebase_database = db
 
-        st.write(f"Token detected, welcome {user_info['email']}")
+email = st.text_input("Email")
+password = st.text_input("Password", type="password")
+if st.button("✔️ Login"):
+    # Authenticate user using Firebase REST API
+    auth_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={st.secrets['firebase_api_key']}"
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    response = requests.post(auth_endpoint, json=payload)
 
-        if st.button("♻️ Refresh Token"):
-                token = oauth2.refresh_token(token)
-        st.session_state.token = token
-        # st.experimental_rerun()
+    if response.status_code == 200:
+        auth_data = response.json()
+        # st.write("Logged in")
+        # st.write("User ID:", auth_data["localId"])
+        # st.write("ID Token:", auth_data["idToken"])
+        # st.json(auth_data)
+        st.success(f"Welcome {auth_data['email']}!")
+        st.session_state.token = auth_data['idToken']
+    else:
+        # st.error("Failed to log in. Please check your login credentials and try again.")
+        # st.error("Response:", response.text)
+        st.error(translate_firebase_error(response.json()))
+
+
+
+if st.button("✉️ Forgot Password"):
+    # Send password reset email using Firebase REST API
+    reset_password_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={st.secrets['firebase_api_key']}"
+    payload = {
+        "requestType": "PASSWORD_RESET",
+        "email": email
+    }
+    response = requests.post(reset_password_endpoint, json=payload)
+
+    if response.status_code == 200:
+        st.success("Password reset email sent. Check your inbox and spam folder.")
+    else:
+        # st.write("Failed to send password reset email. Please ensure you have entered a valid email.")
+        st.error(translate_firebase_error(response.json()))
+
+
+if st.button("👥 Create Account"):
+    # Create new user account using Firebase REST API
+    create_account_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={st.secrets['firebase_api_key']}"
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    response = requests.post(create_account_endpoint, json=payload)
+
+    if response.status_code == 200:
+        auth_data = response.json()
+        st.success(f"Account created and logged in. Welcome {auth_data['email']}")
+        st.session_state.token = auth_data['idToken']
+        # st.write("User ID:", auth_data["localId"])
+        # st.write("ID Token:", auth_data["idToken"])
+    else:
+        # st.error("Failed to create account")
+        st.error(translate_firebase_error(response.json()))
