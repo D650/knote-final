@@ -124,7 +124,7 @@ else:
             for blob in blobs:
                 try:
                     if blob.name.split("/")[2] == "processed_knote_info" and not blob.name == f"users/{user}/processed_knote_info/":
-
+                        st.write(blob.name)
                         local_file_path = os.path.join(local_temp_dir, os.path.basename(blob.name))
                         blob.download_to_filename(local_file_path)
                 except IndexError:
