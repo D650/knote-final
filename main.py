@@ -2,7 +2,7 @@ import json
 import openai
 from langchain import OpenAI
 from llama_index import SimpleDirectoryReader, GPTListIndex, GPTVectorStoreIndex, LLMPredictor, PromptHelper, StorageContext, load_index_from_storage
-import nltk
+# import nltk
 import os
 import streamlit as st
 import time
@@ -43,7 +43,7 @@ if not firebase_admin._apps:
 else:
     app = firebase_admin._apps
 
-nltk.download('punkt')
+# nltk.download('punkt')
 
 max_input_size = 4096
 num_outputs = 512
