@@ -49,57 +49,45 @@ firebase_database = db
 
 
 if 'token' not in st.session_state:
-    st.title("👤 Login")
-    st.info("Welcome back! Log in below. Need an account? Press the sign up button.")
+    st.title("👥 Sign Up")
+    st.info("Welcome to Knote, an AI-based study tool. Sign up for an account below. NOTE: It is highly recommended to use Knote on a computer, as some functionality has been found to be unpredictable on mobile.")
     st.divider()
 
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
-
+    password2 = st.text_input("Confirm Password", type="password")
     st.divider()
 
-    row = row(3, vertical_align="top", gap="small")
+    row = row(2, vertical_align="top", gap="small")
 
-    if row.button("✔️ Login", use_container_width=True):
-        auth_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={st.secrets['firebase_api_key']}"
-        payload = {
-            "email": email,
-            "password": password,
-            "returnSecureToken": True
-        }
-        response = requests.post(auth_endpoint, json=payload)
 
-        if response.status_code == 200:
-            auth_data = response.json()
-            # st.write("Logged in")
-            # st.write("User ID:", auth_data["localId"])
-            # st.write("ID Token:", auth_data["idToken"])
-            # st.json(auth_data)
-            st.balloons()
-            st.success(f"Welcome {auth_data['email']}!")
-            st.session_state.token = auth_data['idToken']
-            st.session_state.user_email = auth_data['email']
+    if row.button("✔️ Submit", use_container_width=True):
+        if password == password2:
+            create_account_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={st.secrets['firebase_api_key']}"
+            payload = {
+                "email": email,
+                "password": password,
+                "returnSecureToken": True
+            }
+            response = requests.post(create_account_endpoint, json=payload)
+
+            if response.status_code == 200:
+                auth_data = response.json()
+                st.balloons()
+                st.success(f"Account created and logged in. Welcome {auth_data['email']}!")
+                st.session_state.token = auth_data['idToken']
+                st.session_state.user_email = auth_data['email']
+                # st.write("User ID:", auth_data["localId"])
+                # st.write("ID Token:", auth_data["idToken"])
+            else:
+                # st.error("Failed to create account")
+                st.error(translate_firebase_error(response.json()))
         else:
-            # st.error("Failed to log in. Please check your login credentials and try again.")
-            # st.error("Response:", response.text)
-            st.error(translate_firebase_error(response.json()))
+            st.error("Those passwords do not match. Please double check and try again.")
 
-    if row.button("✉️ Forgot Password", use_container_width=True):
-        reset_password_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={st.secrets['firebase_api_key']}"
-        payload = {
-            "requestType": "PASSWORD_RESET",
-            "email": email
-        }
-        response = requests.post(reset_password_endpoint, json=payload)
+    if row.button("👤 Login", use_container_width=True):
+        switch_page("login")
 
-        if response.status_code == 200:
-            st.success("Password reset email sent. Check your inbox and spam folder.")
-        else:
-            # st.write("Failed to send password reset email. Please ensure you have entered a valid email.")
-            st.error(translate_firebase_error(response.json()))
-
-    if row.button("👥 Sign Up", use_container_width=True):
-        switch_page("signup")
 else:
     user_info_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={st.secrets['firebase_api_key']}"
     payload = {
@@ -111,6 +99,6 @@ else:
         user_data = response.json().get("users", [])[0]
 
         user = user_data['email']
-    st.title("👤 Login")
-    st.write(f"{user}, You're already logged in!")
+    st.title("👥 Sign Up")
+    st.write(f"{user}, you're already logged in.")
 

@@ -53,14 +53,18 @@ def get_transcript(youtube_url):
 
 
 if 'token' not in st.session_state:
-        st.write("No token in session state. Please authorize on the login page.")
-        if st.button("Go to login page"):
-            switch_page("login")
+    st.title("🎥 Youtube Transcript Extractor")
+    st.write("Please login or create an account to access this page.")
+
+    if st.button("Go to login page"):
+        switch_page("login")
+    if st.button("Go to signup page"):
+        switch_page("signup")
 else:
     user = st.session_state['user_email']
     st.sidebar.write(f"Hello, {user}!")
 
-    st.title("YouTube Transcript Extractor")
+    st.title("🎥 YouTube Transcript Extractor")
     st.divider()
     st.write("Enter a YouTube URL to extract its transcript.")
 

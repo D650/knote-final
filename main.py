@@ -53,9 +53,13 @@ prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chu
 llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-3.5-turbo", max_tokens=num_outputs))
 
 if 'token' not in st.session_state:
-        st.write("No token in session state. Please authorize on the login page.")
-        if st.button("Go to login page"):
-            switch_page("login")
+    st.title("📜 Knote Chatbot")
+    st.write("Please login or create an account to access this page.")
+
+    if st.button("Go to login page"):
+        switch_page("login")
+    if st.button("Go to signup page"):
+        switch_page("signup")
 else:
     user = st.session_state['user_email']
     st.sidebar.write(f"Hello, {user}!")
