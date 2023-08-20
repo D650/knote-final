@@ -38,6 +38,9 @@ A: The application can handle varying lengths of content. However, very long doc
 ### Q: Can I interact with the chatbot in a conversational manner?
 A: Yes, you can interact with the chatbot in a conversational manner. You can ask follow-up questions based on the chatbot's answers to delve deeper into the topic.
 
+### Q: How do I logout?
+A: All you need to do to logout is close the page. 
+
 ## Contact Us
 If you need further assistance or have any questions, please contact our support team at knoteapp0@gmail.com.
 """
