@@ -208,7 +208,7 @@ else:
         try:
             storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
         except FileNotFoundError:
-            st.error("You have not uploaded any files. Please upload some, press refresh and come back to this page.")
+            st.error("You have not uploaded any files. Please upload some, and press refresh chatbot.")
             st.stop()
         index = load_index_from_storage(storage_context)
 
