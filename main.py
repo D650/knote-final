@@ -166,7 +166,11 @@ else:
 
     def chatbot(input_text, messages, uploaded_files=None):
         with st.spinner("Generating response"):
-            storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
+            try:
+                storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
+            except FileNotFoundError:
+                st.error("You have not uploaded any files. Please upload some and come back to this page.")
+                st.stop()
             index = load_index_from_storage(storage_context)
 
             query_engine = index.as_query_engine()
