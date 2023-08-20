@@ -205,7 +205,11 @@ else:
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
 
-        storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
+        try:
+            storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
+        except FileNotFoundError:
+            st.error("You have not uploaded any files. Please upload some, press refresh and come back to this page.")
+            st.stop()
         index = load_index_from_storage(storage_context)
 
         response = chatbot(prompt, st.session_state.messages, index)
