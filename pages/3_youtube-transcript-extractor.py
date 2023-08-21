@@ -16,7 +16,8 @@ key_dict = json.loads(st.secrets["textkey"])
 cred = credentials.Certificate(key_dict)
 if not firebase_admin._apps:
     app = firebase_admin.initialize_app(cred, {
-        'storageBucket': bucket_name
+        'storageBucket': bucket_name,
+        'databaseURL': st.secrets["database_url"]
     })
 else:
     app = firebase_admin._apps

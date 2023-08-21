@@ -38,7 +38,8 @@ cred = credentials.Certificate(key_dict)
 
 if not firebase_admin._apps:
     app = firebase_admin.initialize_app(cred, {
-        'storageBucket': bucket_name
+        'storageBucket': bucket_name,
+        'databaseURL': st.secrets["database_url"]
     })
 else:
     app = firebase_admin._apps
@@ -105,7 +106,7 @@ else:
 
 
     def construct_index():
-        wait_text = "Please Wait"
+        wait_text = "Please Wait... Generating Index"
         with st.spinner(wait_text):
             storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
             bucket = storage_client.bucket(bucket_name)
@@ -138,7 +139,7 @@ else:
             try:
                 documents = SimpleDirectoryReader(local_temp_dir).load_data()
             except ValueError:
-                st.error("You have not uploaded any files. Please upload some and come back to this page.")
+                st.error("You have not uploaded any files. Please upload some and come back to this page to access the chatbot.")
                 st.stop()
             index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             # index_dict = index.storage_context.index_to_json()
@@ -181,14 +182,17 @@ else:
 
             return response.response
 
+
+    construct_index()
+
     st.title("📜 Knote Chatbot")
     st.divider()
 
-    st.info("Welcome to the Knowt Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files. Use /generatequestions to generate a list of 10 questions based on your documents.")
+    st.info("Welcome to the Knote Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files. Use /generatequestions to generate a list of 10 questions based on your documents.")
 
-    st.info("If you've added or removed any files, please press the button below so I can refresh my memory! (If your folder is empty, and you press the button, my memory won't change.")
-    if st.button("🔄 Refresh Chatbot", use_container_width=True):
-        construct_index()
+    # st.info("If you've added or removed any files, please press the button below so I can refresh my memory! (If your folder is empty, and you press the button, my memory won't change.")
+    # if st.button("🔄 Refresh Chatbot", use_container_width=True):
+    #     construct_index()
 
     st.divider()
 
@@ -208,7 +212,8 @@ else:
         try:
             storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
         except FileNotFoundError:
-            st.error("You have not uploaded any files. Please upload some, and press refresh chatbot.")
+            # st.error("You have not uploaded any files. Please upload some, and press refresh chatbot.")
+            st.error("Please upload files to continue.")
             st.stop()
         index = load_index_from_storage(storage_context)
 
