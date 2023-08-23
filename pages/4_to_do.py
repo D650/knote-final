@@ -55,7 +55,7 @@ else:
     user = st.session_state['user_email']
     st.sidebar.write(f"Hello, {user}!")
 
-    st.title("📝 To-Do List")
+    st.title("✏️ To-Do List")
     st.info("This part of the app doesn't have any AI integration, it's just a helpful to-do list tool.")
 
     st.divider()

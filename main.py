@@ -178,21 +178,20 @@ else:
 
             #If the users last message states '/generatecsv', CSV-formatted pairs with key terms from the files and their definitions, like so 'Term,Definition
             prompt = f"User text: {input_text}\n\nRespond to the users' questions and requests. Please keep responses concise and clear, do not say anything innapropraite or offensive. If user text is '/generatequestions' generate a list of 10 multiple choice questions based on the documents uploaded, be sure to include an answer key at the bottom aswell, also indent each answer choice, DO NOT GENERATE QUESTIONS UNLESS THE USERS LATEST MESSAGES EXPLICITLY STATES '/generatequestions'."
+
             response = query_engine.query(prompt)
 
             return response.response
 
-
-    construct_index()
 
     st.title("📜 Knote Chatbot")
     st.divider()
 
     st.info("Welcome to the Knote Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files. Use /generatequestions to generate a list of 10 questions based on your documents.")
 
-    # st.info("If you've added or removed any files, please press the button below so I can refresh my memory! (If your folder is empty, and you press the button, my memory won't change.")
-    # if st.button("🔄 Refresh Chatbot", use_container_width=True):
-    #     construct_index()
+    st.success("If you've added or removed any files, please press the button below so I can refresh my memory.")
+    if st.button("🔄 Refresh Chatbot", use_container_width=True):
+        construct_index()
 
     st.divider()
 
@@ -213,7 +212,7 @@ else:
             storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
         except FileNotFoundError:
             # st.error("You have not uploaded any files. Please upload some, and press refresh chatbot.")
-            st.error("Please upload files to continue.")
+            st.error("Please upload files and press refresh chatbot to continue.")
             st.stop()
         index = load_index_from_storage(storage_context)
 
