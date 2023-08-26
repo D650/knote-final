@@ -65,6 +65,10 @@ if 'token' not in st.session_state:
 else:
     user = st.session_state['user_email']
     st.sidebar.write(f"Hello, {user}!")
+    st.sidebar.divider()
+    st.sidebar.info("If you've added or removed any files, please press the below so I can refresh my memory.")
+    refresh_button = st.sidebar.button("🔄 Refresh Chatbot", use_container_width=True)
+
     def clear_dir(directory_path):
 
         storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
@@ -107,6 +111,7 @@ else:
 
 
     def construct_index():
+        st.session_state["messages"] = []
         wait_text = "Please Wait... Generating Index"
         with st.spinner(wait_text):
             storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
@@ -189,9 +194,9 @@ else:
     st.divider()
 
     st.info("Welcome to the Knote Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files. Use /generatequestions to generate a list of 10 questions based on your documents.")
+    st.info("Remember to refresh the chatbot each time you add new files.")
 
-    st.success("If you've added or removed any files, please press the button below so I can refresh my memory.")
-    if st.button("🔄 Refresh Chatbot", use_container_width=True):
+    if refresh_button:
         construct_index()
 
     st.divider()
@@ -220,6 +225,5 @@ else:
         response = chatbot(prompt, st.session_state.messages, index)
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.chat_message("assistant").write(response)
-
 
 
