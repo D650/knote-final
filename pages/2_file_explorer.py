@@ -124,7 +124,7 @@ else:
     st.sidebar.write(f"Hello, {user}!")
 
     st.title("📁 File Explorer")
-    st.info("Welcome to the file explorer. Here, you can check the files you've uploaded for the chatbot to access. You can either upload .txt or .pdf files below, or input a youtube video link on the youtube transcript extractor page.")
+    st.info("Welcome to the file explorer. Here, you can check the files you've uploaded for the chatbot to access. You can either upload .txt or .pdf files below, input a youtube video link on the youtube transcript extractor page, or paste in raw text on the raw text page.")
     st.divider()
 
     files = list_files_in_directory(f"users/{user}/knote_info", user)
@@ -161,7 +161,7 @@ else:
 
     st.divider()
 
-    uploaded_files = st.file_uploader("Upload your notes here as txt files.", type=["pdf","txt"], accept_multiple_files=True)
+    uploaded_files = st.file_uploader("Upload your notes here as txt or pdf files.", type=["pdf","txt"], accept_multiple_files=True)
     if uploaded_files:
         for uploaded_file in uploaded_files:
             file_name = uploaded_file.name

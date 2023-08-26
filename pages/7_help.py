@@ -14,7 +14,7 @@ st.markdown(
     """
     ## Getting Started
      Using Knote is simple and streamlined, with just three easy steps:
-    1. **Upload Information**: Start by navigating to the file explorer page in the sidebar. There, you can effortlessly upload .pdf and .txt files. Alternatively, if you have a YouTube video link, head to the YouTube transcript extractor page and input the video link to extract its transcript.
+    1. **Upload Information**: Start by navigating to the file explorer page in the sidebar. There, you can effortlessly upload .pdf and .txt files. Alternatively, if you have a YouTube video link, head to the YouTube transcript extractor page and input the video link to extract its transcript. If you have text you just want to paste in, go to the Raw Text page to do so.
 
     2. **Refresh**: After uploading your content, return to the homepage and click the "refresh" button. This ensures that the Knote chabot processes your information for optimal learning outcomes.
 
