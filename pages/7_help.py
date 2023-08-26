@@ -27,7 +27,7 @@ st.markdown(
     
 ## Frequently Asked Questions
 ### Q: What types of documents are supported for upload?
- A: You can upload PDF documents and plain text documents (TXT). The application will extract the content from these files and feed it to the chatbot.
+ A: You can upload PDF documents and plain text documents (TXT). The application will extract the content from these files and feed it to the chatbot. Alternatively, you can paste a youtube video link to get it's transcript or just paste in raw text on their respective pages.
 
 ### Q: How accurate is the chatbot in providing answers?
 A: The chatbot's accuracy depends on the quality of the content you provide. It uses state-of-the-art natural language processing, but it might not always provide perfect answers. It's recommended to ask clear and concise questions for better results.
