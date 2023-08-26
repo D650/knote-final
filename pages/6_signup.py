@@ -60,35 +60,42 @@ if 'token' not in st.session_state:
 
     row = row(2, vertical_align="top", gap="small")
 
+    tos_read = st.checkbox(
+        "I have read and agree to the terms of use found [here](https://knote-ai.streamlit.app/terms_of_use)")
 
     if row.button("✔️ Submit", use_container_width=True):
-        if password == password2:
-            create_account_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={st.secrets['firebase_api_key']}"
-            payload = {
-                "email": email,
-                "password": password,
-                "returnSecureToken": True
-            }
-            response = requests.post(create_account_endpoint, json=payload)
+        if tos_read:
+            if password == password2:
+                create_account_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={st.secrets['firebase_api_key']}"
+                payload = {
+                    "email": email,
+                    "password": password,
+                    "returnSecureToken": True
+                }
+                response = requests.post(create_account_endpoint, json=payload)
 
-            if response.status_code == 200:
-                auth_data = response.json()
-                st.json(auth_data)
-                st.balloons()
-                st.success(f"Account created and logged in. Welcome {auth_data['email']}!")
-                st.session_state.token = auth_data['idToken']
-                st.session_state.user_email = auth_data['email']
-                st.session_state.user_id = auth_data['localId']
-                # st.write("User ID:", auth_data["localId"])
-                # st.write("ID Token:", auth_data["idToken"])
+                if response.status_code == 200:
+                    auth_data = response.json()
+                    st.balloons()
+                    st.success(f"Account created and logged in. Welcome {auth_data['email']}!")
+                    st.session_state.token = auth_data['idToken']
+                    st.session_state.user_email = auth_data['email']
+                    st.session_state.user_id = auth_data['localId']
+                    if st.button("Go to Help Page"):
+                        switch_page("signup")
+                    # st.write("User ID:", auth_data["localId"])
+                    # st.write("ID Token:", auth_data["idToken"])
+                else:
+                    # st.error("Failed to create account")
+                    st.error(translate_firebase_error(response.json()))
             else:
-                # st.error("Failed to create account")
-                st.error(translate_firebase_error(response.json()))
+                st.error("Those passwords do not match. Please double check and try again.")
         else:
-            st.error("Those passwords do not match. Please double check and try again.")
-
+            st.error("Please agree to the terms and conditions to continue")
     if row.button("👤 Login", use_container_width=True):
         switch_page("login")
+
+
 
 else:
     user_info_endpoint = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={st.secrets['firebase_api_key']}"

@@ -15,7 +15,8 @@ if not firebase_admin._apps:
         'storageBucket': bucket_name,
         'databaseURL': st.secrets["database_url"]
     })
-
+else:
+    app = firebase_admin._apps
 
 # Streamlit app
 
@@ -39,7 +40,6 @@ def display_tasks(user):
                     ref = db.reference(f"tasks/{user}/{task_id}")
                     ref.delete()
     else:
-        st.balloons()
         st.success("Congrats! You have no pending tasks! 😄")
 
 if 'token' not in st.session_state:
@@ -70,6 +70,7 @@ else:
         for task in task_list:
             add_task(user_id, task)
             # st.success("Task added!")
+        task_input = ""
 
     st.write("\nCurrent Tasks:")
     display_tasks(user_id)

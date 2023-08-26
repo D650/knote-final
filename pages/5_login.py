@@ -75,7 +75,6 @@ if 'token' not in st.session_state:
             # st.write("User ID:", auth_data["localId"])
             # st.write("ID Token:", auth_data["idToken"])
             # st.json(auth_data)
-            st.balloons()
             st.success(f"Welcome {auth_data['email']}!")
             st.session_state.token = auth_data['idToken']
             st.session_state.user_email = auth_data['email']
