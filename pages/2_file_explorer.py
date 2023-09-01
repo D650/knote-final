@@ -135,7 +135,10 @@ else:
     else:
         st.error("No files found. Go upload some!")
 
-    del_file = st.text_input("Enter the file path to delete:")
+
+    del_file = st.selectbox('File path',
+    (files))
+    # del_file = st.text_input("Enter the file path to delete:")
     del_file = f"users/{del_file}"
 
     st.divider()

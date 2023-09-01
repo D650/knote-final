@@ -66,8 +66,9 @@ else:
     user = st.session_state['user_email']
     st.sidebar.write(f"Hello, {user}!")
     st.sidebar.divider()
-    st.sidebar.info("If you've added or removed any files, please press the below so I can refresh my memory.")
-    refresh_button = st.sidebar.button("🔄 Refresh Chatbot", use_container_width=True)
+    delete_history_button = st.sidebar.button("🗑️ Delete Current Chat", use_container_width=True)
+    if delete_history_button and st.session_state["messages"]:
+        del st.session_state["messages"]
 
     def clear_dir(directory_path):
 
@@ -88,6 +89,7 @@ else:
 
         for blob in blobs:
             if blob.name.endswith(".txt"):
+
                 article_text = blob.download_as_text()
                 words = article_text.split()
 
@@ -109,16 +111,15 @@ else:
                 article_text = None
 
 
-
     def construct_index():
         st.session_state["messages"] = []
-        wait_text = "Please Wait... Generating Index"
-        with st.spinner(wait_text):
+
+        with st.status("Generating Index...", expanded=True) as status:
             storage_client = storage.Client.from_service_account_info(json.loads(st.secrets["textkey"]))
             bucket = storage_client.bucket(bucket_name)
-            wait_text = "Tokenizing"
+            st.write("Tokenizing...")
             tokenize_and_divide(f"users/{user}/knote_info", 4096)
-
+            st.write("Tokenization Complete!")
             local_temp_dir = 'temp_index_processed'
             os.makedirs(local_temp_dir, exist_ok=True)
 
@@ -135,7 +136,7 @@ else:
                     pass
                 except FileNotFoundError:
                     pass
-
+            st.write("Indexing...")
             max_input_size = 4096
             num_outputs = 512
             max_chunk_overlap = 0.5
@@ -145,7 +146,7 @@ else:
             try:
                 documents = SimpleDirectoryReader(local_temp_dir).load_data()
             except ValueError:
-                st.error("You have not uploaded any files. Please upload some and come back to this page to access the chatbot.")
+                st.error("You have not uploaded any files. Please upload some and come back to this page to access the chatbot")
                 st.stop()
             index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             # index_dict = index.storage_context.index_to_json()
@@ -163,7 +164,7 @@ else:
             #         destination_blob_name = os.path.join(destination_directory, relative_path).replace("\\", "/")
             #         blob = bucket.blob(destination_blob_name)
             #         blob.upload_from_filename(local_file_path)
-            st.success('Index Generated!')
+            status.update(label="Index Generated!", expanded=False)
             return index
 
     def convert_to_dict(vector_store_index):
@@ -190,15 +191,11 @@ else:
             return response.response
 
 
+
     st.title("📜 Knote Chatbot")
     st.divider()
 
     st.info("Welcome to the Knote Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files. Use /generatequestions to generate a list of 10 questions based on your documents.")
-    st.info("Remember to refresh the chatbot each time you add new files.")
-
-    if refresh_button:
-        construct_index()
-
     st.divider()
 
     if "messages" not in st.session_state:
@@ -225,5 +222,9 @@ else:
         response = chatbot(prompt, st.session_state.messages, index)
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.chat_message("assistant").write(response)
+    st.info("If you've added or removed any files, please press the below so I can refresh my memory.")
+    refresh_button = st.button("🔄 Refresh Chatbot", use_container_width=True)
+    if refresh_button:
+        construct_index()
 
 
