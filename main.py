@@ -184,7 +184,7 @@ else:
             query_engine = index.as_query_engine()
 
             #If the users last message states '/generatecsv', CSV-formatted pairs with key terms from the files and their definitions, like so 'Term,Definition
-            prompt = f"User text: {input_text}\n\nRespond to the users' questions and requests. Please keep responses concise and clear, do not say anything innapropraite or offensive. If user text is '/generatequestions' generate a list of 10 multiple choice questions based on the documents uploaded, be sure to include an answer key at the bottom aswell, also indent each answer choice, DO NOT GENERATE QUESTIONS UNLESS THE USERS LATEST MESSAGES EXPLICITLY STATES '/generatequestions'."
+            prompt = f"User text: {input_text}\n\nRespond to the users' questions and requests. Please keep responses concise and clear, do not say anything innapropraite or offensive"
 
             response = query_engine.query(prompt)
 
@@ -195,7 +195,7 @@ else:
     st.title("📜 Knote Chatbot")
     st.divider()
 
-    st.info("Welcome to the Knote Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files. Use /generatequestions to generate a list of 10 questions based on your documents.")
+    st.info("Welcome to the Knote Chatbot. This chatbot helps you study by answering any questions you have about the information you upload to it. You can also use it to generate questions to aid in your studying. To begin, visit the file explorer page through the sidebar for instruction on how to upload files.")
     st.divider()
 
     if "messages" not in st.session_state:
