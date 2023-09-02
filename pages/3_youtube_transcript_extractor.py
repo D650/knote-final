@@ -82,5 +82,6 @@ else:
                 value=transcript,height=500)
             if st.button("🤖 Send to File Explorer"):
                 string_to_txt_file(user_text,f"youtube_{video_id}_{int(time.time())}", user)
+                st.success("File sent!")
 
 

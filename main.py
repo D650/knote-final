@@ -146,7 +146,7 @@ else:
             try:
                 documents = SimpleDirectoryReader(local_temp_dir).load_data()
             except ValueError:
-                st.error("You have not uploaded any files. Please upload some and come back to this page to access the chatbot")
+                st.error("You have not uploaded any files. Please upload some and come back to this page to access the chatbot.")
                 st.stop()
             index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             # index_dict = index.storage_context.index_to_json()
@@ -172,7 +172,7 @@ else:
         dictionary = json.loads(serialized_index)
         return dictionary
 
-    def chatbot(input_text, messages, uploaded_files=None):
+    def chatbot(input_text):
         with st.spinner("Generating response"):
             try:
                 storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
@@ -211,17 +211,10 @@ else:
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
 
-        try:
-            storage_context = StorageContext.from_defaults(persist_dir=f'{AWS_BUCKET_NAME}/{user}', fs=s3)
-        except FileNotFoundError:
-            # st.error("You have not uploaded any files. Please upload some, and press refresh chatbot.")
-            st.error("Please upload files and press refresh chatbot to continue.")
-            st.stop()
-        index = load_index_from_storage(storage_context)
-
-        response = chatbot(prompt, st.session_state.messages, index)
+        response = chatbot(prompt)
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.chat_message("assistant").write(response)
+
     st.info("If you've added or removed any files, please press the below so I can refresh my memory.")
     refresh_button = st.button("🔄 Refresh Chatbot", use_container_width=True)
     if refresh_button:

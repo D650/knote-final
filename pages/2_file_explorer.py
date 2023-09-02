@@ -67,7 +67,7 @@ def clear_dir(directory_path):
     if files:
         for file in files:
             delete_file_from_storage(f"users/{file}")
-    st.success(f"Directory cleared successfully.")
+
 
 ### PDF PROCESSING FUNCTIONS ####
 def string_to_txt_file(contents, file_name, user):
@@ -105,11 +105,11 @@ def process_uploaded_file(uploaded_file, user):
     st.subheader("Extracted Text:")
 
     user_text = st.text_area(
-        "If this doesn't look right, you can edit it. Once you're ready, click 'Send to Storage'",
+        "If this doesn't look right, you can edit it. Once you're ready, click 'Send to Storage.'",
         value=extracted_text, height=500)
     if st.button("🤖 Send to Storage"):
         string_to_txt_file(user_text, f"u{file_name.split('.')[0]}_{int(time.time())}.txt", user)
-
+        st.success("File sent to storage!")
 
 if 'token' not in st.session_state:
         st.title("📁 File Explorer")
@@ -157,8 +157,10 @@ else:
 
     if row.button("🗑️ Delete All Files",use_container_width=True):
         clear_dir(f"{user}/knote_info")
+        st.success("All files deleted!")
 
     if row.button("🔄 Refresh",use_container_width=True):
+        st.info("Refreshing...")
         time.sleep(1)
         st.experimental_rerun()
 

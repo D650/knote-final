@@ -50,5 +50,5 @@ else:
     value="",height=500)
     if st.button("🤖 Send to File Explorer"):
         string_to_txt_file(user_text,f"text_{int(time.time())}", user)
-
+        st.success("File sent!")
 

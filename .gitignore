@@ -154,3 +154,4 @@ cython_debug/
 .streamlit/
 
 pages_under_construction/
+*.csv
