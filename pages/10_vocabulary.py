@@ -110,14 +110,14 @@ else:
                     term, definition = pair.split(',', 1)
                     vocab_dict[term.strip()] = definition.strip()
 
-            st.write(vocab_dict)
+
             st.write("Formatting to CSV...")
             csv_data = ""
             for key in vocab_dict:
                 csv_data += f"{key},{dict[key]}\n"
 
             status.update(label="Vocabulary CSV Generated!", expanded=False)
-            return csv_data
+            return csv_data, vocab_dict
 
 
     st.title("📚 CSV Vocabulary Generator")
@@ -127,12 +127,12 @@ else:
     st.divider()
 
     row_element = row([4, 1], vertical_align="bottom")
-    vocab_num = row_element.slider('How many vocab words would you like to generate?', 1, 75, 25, help="Larger values may lead lower quality vocabulary words near the end")
+    vocab_num = row_element.slider('How many vocab words would you like to generate?', 1, 75, 25, help="Larger values may lead lower quality vocabulary words near the end. May occasionally ignore number if more vocab words are seen in text.")
     vocab_gen_submit = row_element.button("Generate Vocab")
 
     if vocab_gen_submit:
-        csv_data = vocabbot(vocab_num)
-
+        csv_data, vocab_dict = vocabbot(vocab_num)
+        st.write(vocab_dict)
 
         st.download_button(
             "Press to Download",

@@ -104,7 +104,7 @@ else:
     st.title("❓ Quiz Generator")
     st.divider()
 
-    st.info("Welcome to the Quiz Generator. You can use this page to generate a practice test based on the files you provided.")
+    st.info("Welcome to the Quiz Generator. You can use this page to generate a practice test based on the files you provided. Please note that depending on the quality of the information you provide, the AI may occasionally misinterpret something.")
     st.divider()
 
     if 'question_dict' not in st.session_state:
