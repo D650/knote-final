@@ -1,7 +1,7 @@
 import json
 import openai
 from langchain import OpenAI
-from llama_index import SimpleDirectoryReader, GPTListIndex, GPTVectorStoreIndex, LLMPredictor, PromptHelper, StorageContext, load_index_from_storage
+from llama_index import SimpleDirectoryReader, GPTListIndex, GPTVectorStoreIndex, LLMPredictor, PromptHelper, StorageContext, load_index_from_storage, download_loader, Document
 # import nltk
 import os
 import streamlit as st
@@ -14,9 +14,16 @@ import s3fs
 import requests
 from streamlit_extras.switch_page_button import switch_page
 
+
+
+
+
 AWS_KEY = st.secrets["aws_key"]
 AWS_SECRET = os.environ['aws_secret']
 AWS_BUCKET_NAME = os.environ['aws_bucket_name']
+FIREBASE_PROJ_ID = os.environ['firebase_proj_id']
+
+
 
 assert AWS_KEY is not None and AWS_KEY != ""
 
@@ -44,6 +51,9 @@ if not firebase_admin._apps:
     })
 else:
     app = firebase_admin._apps
+
+# FirestoreReader = download_loader('FirestoreReader')
+# reader = FirestoreReader(project_id=FIREBASE_PROJ_ID)
 
 # nltk.download('punkt')
 
@@ -120,9 +130,9 @@ else:
             st.write("Tokenizing...")
             tokenize_and_divide(f"users/{user}/knote_info", 4096)
             st.write("Tokenization Complete!")
-            local_temp_dir = 'temp_index_processed'
-            os.makedirs(local_temp_dir, exist_ok=True)
-
+            # local_temp_dir = 'temp_index_processed'
+            # os.makedirs(local_temp_dir, exist_ok=True)
+            documents = []
             blobs = storage_client.list_blobs(bucket_name)
 
             for blob in blobs:
@@ -130,8 +140,10 @@ else:
                     if blob.name.split("/")[2] == "processed_knote_info" and blob.name.split("/")[1] == user and not blob.name == f"users/{user}/processed_knote_info/" and not blob.name == f"users/{user}/processed_knote_info/":
 
 
-                        local_file_path = os.path.join(local_temp_dir, os.path.basename(blob.name))
-                        blob.download_to_filename(local_file_path)
+                        # local_file_path = os.path.join(local_temp_dir, os.path.basename(blob.name))
+                        # blob.download_to_filename(local_file_path)
+                        doc = Document(text=blob.download_as_text(), doc_id='your_doc_id', embedding=None, doc_hash=None)
+                        documents.append(doc)
                 except IndexError:
                     pass
                 except FileNotFoundError:
@@ -142,16 +154,22 @@ else:
             max_chunk_overlap = 0.5
             chunk_size_limit = 600
             prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
+
             llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-3.5-turbo", max_tokens=num_outputs))
             try:
-                documents = SimpleDirectoryReader(local_temp_dir).load_data()
+
+                # documents = reader.load_data(collection=f'users/{user}/processed_knote_info/')
+                # documents = SimpleDirectoryReader(local_temp_dir).load_data()
+                if not documents:
+                    raise ValueError
+                pass
             except ValueError:
                 st.error("You have not uploaded any files. Please upload some and come back to this page to access the chatbot.")
                 st.stop()
             index = GPTVectorStoreIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
             # index_dict = index.storage_context.index_to_json()
             # db.reference('index').set(index_dict)
-            shutil.rmtree(local_temp_dir)
+            # shutil.rmtree(local_temp_dir)
             # index.storage_context.persist(f'{user}.json')
             index.storage_context.persist(f'{AWS_BUCKET_NAME}/{user}', fs=s3)
             # local_directory = f"{user}.json"
