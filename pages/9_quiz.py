@@ -165,7 +165,7 @@ else:
                     st.write(st.session_state.feedback)
 
         # Display the score
-        st.metric("Score", f"{st.session_state.score}/{len(st.session_state.question_dict)}")
+        # st.metric("Score", f"{st.session_state.score}/{len(st.session_state.question_dict)}")
         reset = st.button("Reset")
         if reset:
             del st.session_state['question_dict']
